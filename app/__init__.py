@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_migrate import Migrate
 from .extensions import db
 from .config import Config
 
@@ -13,6 +14,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     app.register_blueprint(exercise_routes)
     app.register_blueprint(user_routes)
