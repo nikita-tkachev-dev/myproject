@@ -1,12 +1,15 @@
 from app.extensions import db
+from datetime import datetime, date, time
 
 class NutritionLog(db.Model):
+    __tablename__ = 'nutritionlogs'
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     name = db.Column(db.String(100))  # креатин, протеин и т.д.
     amount = db.Column(db.String(50))  # "5g", "2 scoops"
     time = db.Column(db.Time, default=db.func.current_time())
-    date = db.Column(db.Date, default=db.func.current_date())
+    date = db.Column(db.Date, default=date.today, nullable=False)
 
     user = db.relationship("User", back_populates="nutrition_logs")
