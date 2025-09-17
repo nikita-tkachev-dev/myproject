@@ -11,9 +11,9 @@ def create_workout():
     workout = Workout(
         user_id=data["user_id"],
         exercise_id=data["exercise_id"],
-        weight=data.get("weight", 0),
-        reps=data.get("reps", 0),
-        sets=data.get("sets", 0)
+        weight=data.get("weight"),
+        reps=data.get("reps"),
+        sets=data.get("sets")
     )
 
     db.session.add(workout)
