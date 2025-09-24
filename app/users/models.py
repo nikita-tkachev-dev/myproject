@@ -13,6 +13,16 @@ class User(db.Model):
         db.Enum('beginner', 'intermediate', 'advanced', name='user_levels'),
         default='beginner'
     )
+
+    #Персональные данные
+    birth_date = db.Column(db.Date, nullable=True)
+    height = db.Column(db.Integer, nullable=True)
+    weight = db.Column(db.Float, nullable=True)
+    gender = db.Column(
+        db.Enum('male', 'female', 'other', name='genders'),
+        nullable=True
+    )
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 

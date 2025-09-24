@@ -3,7 +3,7 @@ from app.extensions import db
 from .models import WorkoutSession, WorkoutExercise, ExerciseSet
 from datetime import datetime
 
-workout_routes = Blueprint('workout_router', __name__, url_prefix='/workouts')
+workout_routes = Blueprint('workouts', __name__, url_prefix='/workouts')
 
 @workout_routes.route("/create", methods=["POST"])
 def create_workout():

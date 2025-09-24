@@ -1,5 +1,5 @@
 from app.extensions import db
-from datetime import datetime, date, time
+from datetime import date
 
 class NutritionLog(db.Model):
     __tablename__ = 'nutritionlogs'

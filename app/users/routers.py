@@ -22,7 +22,11 @@ def create_user():
     user = User(
         username=data["username"],
         email=data["email"],
-        level=data.get("level", "beginner")
+        level=data.get("level", "beginner"),
+        birth_date = data.get("birth_date"),
+        height=data.get("height"),
+        weight=data.get("weight"),
+        gender=data.get("gender")
     )
     user.password_hash = generate_password_hash(data["password"])
 
