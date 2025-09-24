@@ -36,11 +36,15 @@ def create_user():
 
         # Создаём цели, если они есть
         for g in data.get("goals", []):
+            current_value = g.get("current_value")
+            if current_value is None and g["goal_type"] in ["weight_loss", "muscle_gain"]:
+                current_value = user.weight
+
             goal = Goal(
                 user_id=user.id,
                 goal_type=g["goal_type"],
                 target_value=g.get("target_value"),
-                current_value=g.get("current_value", 0),
+                current_value=current_value,
                 unit=g.get("unit"),
                 target_date=datetime.strptime(g["target_date"], "%Y-%m-%d").date() if g.get("target_date") else None,
                 is_active=g.get("is_active", True)
