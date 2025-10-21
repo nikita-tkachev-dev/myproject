@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Выбрать уровень - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="/users/dashboard" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Назад
+        </a>
+        <h1 class="text-3xl font-bold mb-2">Уровень подготовки</h1>
+        <p class="text-slate-600">Выберите ваш текущий уровень</p>
+        {% if user and user.level %}
+            <p class="text-sm text-blue-600 mt-2">Текущий: <span class="font-semibold">{{ user.level|upper }}</span></p>
+        {% endif %}
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-4">
+        <!-- Beginner -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="level" 
+                value="beginner" 
+                class="peer hidden"
+                {% if user and user.level == 'beginner' %}checked{% endif %}
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-blue-500 transition-all">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5"/>
+                        </svg>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 border-slate-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                        <svg class="w-4 h-4 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Начальный</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Я только начинаю свой фитнес путь или возвращаюсь после длительного перерыва
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Базовые упражнения</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Легкий темп</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Intermediate -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="level" 
+                value="intermediate" 
+                class="peer hidden"
+                {% if user and user.level == 'intermediate' %}checked{% endif %}
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-blue-500 transition-all">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 border-slate-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                        <svg class="w-4 h-4 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Средний</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Я тренируюсь регулярно и готов к более интенсивным нагрузкам
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">Средняя нагрузка</span>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">Разнообразие</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Advanced -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="level" 
+                value="advanced" 
+                class="peer hidden"
+                {% if user and user.level == 'advanced' %}checked{% endif %}
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-blue-500 transition-all">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 border-slate-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                        <svg class="w-4 h-4 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Продвинутый</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Я опытный спортсмен и готов к максимальным нагрузкам
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Высокая интенсивность</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Профессиональный</span>
+                </div>
+            </div>
+        </label>
+
+        <button 
+            type="submit"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all mt-6"
+        >
+            Сохранить уровень
+        </button>
+    </form>
+</div>
+{% endblock %}
