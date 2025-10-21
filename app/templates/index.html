@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Welcome - Training Manager{% endblock %}
+{% block content %}
+<div class="min-h-screen flex flex-col">
+    <div class="flex-1 flex flex-col justify-center px-6 py-12">
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Training Manager
+            </h1>
+            <p class="text-lg text-slate-600">
+                Your personal fitness companion
+            </p>
+        </div>
+        <div class="space-y-4 mb-8">
+            <div class="bg-white rounded-3xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Персональные тренировки</h3>
+                <p class="text-slate-600 text-sm">Программы под ваш уровень подготовки</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Отслеживание прогресса</h3>
+                <p class="text-slate-600 text-sm">Следите за своими достижениями</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Достигайте целей</h3>
+                <p class="text-slate-600 text-sm">Ставьте цели и выполняйте их</p>
+            </div>
+        </div>
+    </div>
+    <div class="px-6 pb-8 space-y-3">
+        <a href="/users/register" class="block w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            Начать тренировки
+        </a>
+        <a href="/users/login" class="block w-full py-4 bg-white text-slate-700 text-center font-semibold rounded-2xl shadow-md hover:shadow-lg transition-all border border-slate-200">
+            Уже есть аккаунт
+        </a>
+    </div>
+</div>
+{% endblock %}
