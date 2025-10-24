@@ -4,7 +4,8 @@ from .models import NutritionLog
 
 nutrition_routes = Blueprint("nutrition", __name__, url_prefix="/nutrition")
 
-# Создание записи питания
+
+# Create a nutrition log entry
 @nutrition_routes.route("/create", methods=["POST"])
 def create_nutrition():
     data = request.get_json()
@@ -16,8 +17,8 @@ def create_nutrition():
         user_id=data["user_id"],
         name=data["name"],
         amount=data["amount"],
-        time=data.get("time"),  # ожидается формат "HH:MM:SS", если передан
-        date=data.get("date")   # ожидается формат "YYYY-MM-DD", если передан
+        time=data.get("time"),  # expected format "HH:MM:SS" if provided
+        date=data.get("date"),  # expected format "YYYY-MM-DD" if provided
     )
 
     try:
@@ -28,17 +29,25 @@ def create_nutrition():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-# Получение всех записей пользователя
+
+# Retrieve all logs for a user
 @nutrition_routes.route("/user/<int:user_id>", methods=["GET"])
 def get_user_nutrition(user_id):
-    logs = NutritionLog.query.filter_by(user_id=user_id).order_by(NutritionLog.date.desc(), NutritionLog.time.desc()).all()
-    return jsonify([
-        {
-            "id": log.id,
-            "user_id": log.user_id,
-            "name": log.name,
-            "amount": log.amount,
-            "date": log.date.isoformat() if log.date else None,
-            "time": log.time.isoformat() if log.time else None
-        } for log in logs
-    ])
+    logs = (
+        NutritionLog.query.filter_by(user_id=user_id)
+        .order_by(NutritionLog.date.desc(), NutritionLog.time.desc())
+        .all()
+    )
+    return jsonify(
+        [
+            {
+                "id": log.id,
+                "user_id": log.user_id,
+                "name": log.name,
+                "amount": log.amount,
+                "date": log.date.isoformat() if log.date else None,
+                "time": log.time.isoformat() if log.time else None,
+            }
+            for log in logs
+        ]
+    )

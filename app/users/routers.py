@@ -21,13 +21,13 @@ def _create_user(data):
     if not data or not all(k in data for k in ("username", "email", "password")):
         return None, ("Missing required fields", 400)
 
-    # Проверка уникальности
+    # Check uniqueness
     if User.query.filter(
         (User.username == data["username"]) | (User.email == data["email"])
     ).first():
         return None, ("Username or email already exists", 400)
 
-    # Безопасный разбор входных значений (дата, числа могут быть пустыми строками)
+    # Safe parsing of input values (dates/numbers may be empty strings)
     birth_date = None
     bd = data.get("birth_date")
     if bd:
@@ -40,7 +40,7 @@ def _create_user(data):
     h_raw = data.get("height")
     if h_raw is not None and str(h_raw).strip() != "":
         try:
-            # допускаем целые или вещественные строки
+            # allow integer or float strings
             height = int(float(str(h_raw)))
         except Exception:
             height = None
@@ -53,7 +53,7 @@ def _create_user(data):
         except Exception:
             weight = None
 
-    # Создаём пользователя
+    # Create the user
     user = User(
         username=data["username"],
         email=data["email"],
@@ -67,9 +67,9 @@ def _create_user(data):
 
     try:
         db.session.add(user)
-        db.session.flush()  # чтобы появился user.id
+        db.session.flush()  # Ensure user.id is available
 
-        # Создаём цели, если они есть
+        # Create goals if provided
         for g in data.get("goals", []):
             current_value = g.get("current_value")
             if current_value is None and g["goal_type"] in [

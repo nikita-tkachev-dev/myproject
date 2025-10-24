@@ -1,7 +1,29 @@
+/* Custom styles for Flask Training Manager */
+
+/* Smooth transitions */
 * {
     -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* Fix viewport issues for mobile */
+html {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Remove number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -9,14 +31,69 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 input[type="number"] {
-    -moz-appearance: none;
-    appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
+/* Radio button custom styling with animations */
+input[type="radio"] + div {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+input[type="radio"]:checked + div {
+    transform: scale(1.02);
+}
+
+
+
+/* Per-level icon fallbacks (icon gradient + shadow) */
+input[type="radio"][value="beginner"]:checked + div .level-icon {
+    background-image: linear-gradient(135deg, #16a34a 0%, #059669 100%) !important;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.12) !important;
+}
+input[type="radio"][value="intermediate"]:checked + div .level-icon {
+    background-image: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 6px 18px rgba(249, 115, 22, 0.12) !important;
+}
+input[type="radio"][value="advanced"]:checked + div .level-icon {
+    background-image: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.12) !important;
+}
+
+/* (removed .level-marker related rules — markers were removed from templates) */
+
+/* Make the whole card look selected (tint background + ring/shadow) — mirror gender radio animations */
+input[type="radio"][value="beginner"]:checked + div {
+    background-color: #ecfdf5 !important; /* green-50 */
+    border-color: #16a34a !important;
+    box-shadow: 0 12px 40px rgba(16,185,129,0.08) !important;
+}
+input[type="radio"][value="intermediate"]:checked + div {
+    background-color: #fff7ed !important; /* orange-50 */
+    border-color: #f97316 !important;
+    box-shadow: 0 12px 40px rgba(249,115,22,0.08) !important;
+}
+input[type="radio"][value="advanced"]:checked + div {
+    background-color: #f5f3ff !important; /* purple-50 */
+    border-color: #7c3aed !important;
+    box-shadow: 0 12px 40px rgba(124,58,237,0.08) !important;
+}
+
+/* (removed .level-marker related color rules — markers were removed from templates) */
+
+/* Hover effects for interactive elements */
+label:has(input[type="radio"]) {
+    cursor: pointer;
+}
+
+/* Smooth scrolling */
 html {
     scroll-behavior: smooth;
 }
 
+/* Custom gradient backgrounds */
 .gradient-primary {
     background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
 }
@@ -29,6 +106,7 @@ html {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
+/* iOS safe area support */
 @supports (padding: max(0px)) {
     body {
         padding-left: max(0px, env(safe-area-inset-left));
@@ -37,6 +115,7 @@ html {
     }
 }
 
+/* Animation utilities */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -52,6 +131,51 @@ html {
     animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* Pulse animation for buttons */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Focus states for accessibility */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
