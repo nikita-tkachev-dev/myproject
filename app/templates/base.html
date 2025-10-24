@@ -2,18 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>{% block title %}Training Manager{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#f97316',
+                        accent: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gradient-to-b from-slate-50 to-slate-100 min-h-screen">
-    <!-- iPhone 12 width: 390px -->
-    <div class="w-screen max-w-sm mx-auto min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 fixed inset-0 overflow-auto">
+    <!-- iPhone Safe Area -->
+    <div class="mx-auto max-w-md min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+                <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
                     {% for category, msg in messages %}
                         <div class="mb-2 p-4 rounded-2xl shadow-lg backdrop-blur-sm
                                     {% if category == 'success' %}bg-green-500 text-white{% endif %}
@@ -25,10 +40,11 @@
                 </div>
             {% endif %}
         {% endwith %}
-        
+
         <main>
             {% block content %}{% endblock %}
         </main>
     </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

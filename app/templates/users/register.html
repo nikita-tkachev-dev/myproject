@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Регистрация - Training Manager{% endblock %}
+{% block title %}Registration - Training Manager{% endblock %}
 
 {% block content %}
 <div class="min-h-screen px-6 py-8">
@@ -10,16 +10,16 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад
+            Back
         </a>
-        <h1 class="text-3xl font-bold mb-2">Создать аккаунт</h1>
-        <p class="text-slate-600">Присоединяйтесь к Training Manager</p>
+        <h1 class="text-3xl font-bold mb-2">Create an account</h1>
+        <p class="text-slate-600">Join Training Manager</p>
     </div>
 
     <!-- Form -->
     <form method="post" class="space-y-4">
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Имя пользователя</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
             <input 
                 type="text" 
                 name="username" 
@@ -41,7 +41,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Пароль</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
             <input 
                 type="password" 
                 name="password"
@@ -52,7 +52,7 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Рост (см)</label>
+                <label class="block text-sm font-medium text-slate-700 mb-2">High (cm)</label>
                 <input 
                     type="number" 
                     name="height" 
@@ -61,7 +61,7 @@
                 >
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Вес (кг)</label>
+                <label class="block text-sm font-medium text-slate-700 mb-2">weight (kg)</label>
                 <input 
                     type="number" 
                     name="weight" 
@@ -72,7 +72,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Дата рождения</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Date of birth</label>
             <input 
                 type="date" 
                 name="birth_date" 
@@ -82,27 +82,90 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Пол</label>
-            <select 
-                name="gender"
-                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-            >
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-                <option value="other">Другой</option>
-            </select>
+            <label class="block text-sm font-medium text-slate-700 mb-3">Gender</label>
+            <div class="space-y-3">
+                <!-- Male -->
+                <label class="block cursor-pointer">
+                    <input 
+                        type="radio" 
+                        name="gender" 
+                        value="male" 
+                        class="peer hidden"
+                        checked
+                    >
+                    <div class="bg-white rounded-2xl p-4 border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200 hover:shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-slate-700">Male</span>
+                            </div>
+                            <!-- gender marker removed: selection is indicated by card styling -->
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Female -->
+                <label class="block cursor-pointer">
+                    <input 
+                        type="radio" 
+                        name="gender" 
+                        value="female" 
+                        class="peer hidden"
+                    >
+                    <div class="bg-white rounded-2xl p-4 border-2 border-slate-200 peer-checked:border-pink-500 peer-checked:bg-pink-50 transition-all duration-200 hover:shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-slate-700">Female</span>
+                            </div>
+                            <!-- gender marker removed: selection is indicated by card styling -->
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Other -->
+                <label class="block cursor-pointer">
+                    <input 
+                        type="radio" 
+                        name="gender" 
+                        value="other" 
+                        class="peer hidden"
+                    >
+                    <div class="bg-white rounded-2xl p-4 border-2 border-slate-200 peer-checked:border-purple-500 peer-checked:bg-purple-50 transition-all duration-200 hover:shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-slate-700">Other</span>
+                            </div>
+                            <!-- gender marker removed: selection is indicated by card styling -->
+                        </div>
+                    </div>
+                </label>
+            </div>
         </div>
 
         <button 
             type="submit"
             class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all mt-6"
         >
-            Создать аккаунт
+            Create an account
         </button>
     </form>
 
     <p class="text-center text-slate-600 mt-6">
-        Уже есть аккаунт? <a href="/users/login" class="text-blue-600 font-semibold hover:underline">Войти</a>
+        Already have an account? <a href="/users/login" class="text-blue-600 font-semibold hover:underline">Login</a>
     </p>
 </div>
 {% endblock %}
