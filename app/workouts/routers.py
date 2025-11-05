@@ -1,9 +1,27 @@
-from flask import Blueprint, request, jsonify
+from flask import (
+    Blueprint,
+    request,
+    jsonify,
+    render_template,
+    redirect,
+    url_for,
+    session,
+    flash,
+)
 from app.extensions import db
 from .models import WorkoutSession, WorkoutExercise, ExerciseSet
 from datetime import datetime
 
 workout_routes = Blueprint("workouts", __name__, url_prefix="/workouts")
+
+
+@workout_routes.route("/")
+def dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("users.login"))
+
+    workouts = WorkoutSession.query.filter_by(user_id=session["user_id"]).all()
+    return render_template("dashboard.html", workouts=workouts)
 
 
 @workout_routes.route("/create", methods=["POST"])

@@ -69,30 +69,6 @@ def _create_user(data):
         db.session.add(user)
         db.session.flush()  # Ensure user.id is available
 
-        # Create goals if provided
-        for g in data.get("goals", []):
-            current_value = g.get("current_value")
-            if current_value is None and g["goal_type"] in [
-                "weight_loss",
-                "muscle_gain",
-            ]:
-                current_value = user.weight
-
-            goal = Goal(
-                user_id=user.id,
-                goal_type=g["goal_type"],
-                target_value=g.get("target_value"),
-                current_value=current_value,
-                unit=g.get("unit"),
-                target_date=(
-                    datetime.strptime(g["target_date"], "%Y-%m-%d").date()
-                    if g.get("target_date")
-                    else None
-                ),
-                is_active=g.get("is_active", True),
-            )
-            db.session.add(goal)
-
         db.session.commit()
         return user, None
     except Exception as e:
@@ -125,15 +101,8 @@ def create_user():
     if request.is_json:
         # safe message
         username_safe = getattr(user, "username", "<user>")
-        goals_count = 0
-        try:
-            goals_count = len(data.get("goals", []) if data else [])
-        except Exception:
-            goals_count = 0
         return (
-            jsonify(
-                {"message": f"User {username_safe} created with {goals_count} goals!"}
-            ),
+            jsonify({"message": f"User {username_safe} created!"}),
             201,
         )
 
@@ -218,6 +187,59 @@ def select_level():
         return redirect(url_for("users.dashboard"))
 
     return render_template("users/select_level.html", user=user)
+
+
+@user_routes.route("/select-goal", methods=["GET", "POST"])
+def select_goal():
+    if "user_id" not in session:
+        flash("Please log in first", "error")
+        return redirect(url_for("users.login"))
+
+    user = User.query.get(session["user_id"])
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("users.login"))
+
+    if request.method == "POST":
+        goal_type = request.form.get("goal_type")
+        target_value = request.form.get("target_value")
+        unit = request.form.get("unit")
+        target_date = request.form.get("target_date")
+
+        if not goal_type:
+            flash("Please select a goal", "error")
+            return render_template("users/select_goal.html", user=user)
+
+        existing_goal = Goal.query.filter_by(
+            user_id=user.id, goal_type=goal_type
+        ).first()
+        if existing_goal:
+            flash("You already have this goal", "error")
+            return redirect(url_for("users.dashboard"))
+
+        current_value = None
+        if goal_type in ["weight_loss", "muscle_gain"]:
+            current_value = user.weight
+
+        goal = Goal(
+            user_id=user.id,
+            goal_type=goal_type,
+            target_value=float(target_value) if target_value else None,
+            current_value=current_value,
+            unit=unit,
+            target_date=(
+                datetime.strptime(target_date, "%Y-%m-%d").date()
+                if target_date
+                else None
+            ),
+        )
+        db.session.add(goal)
+        db.session.commit()
+
+        flash("Goal saved successfully", "success")
+        return redirect(url_for("users.dashboard"))
+
+    return render_template("users/select_goal.html", user=user)
 
 
 @user_routes.route("/dashboard")
