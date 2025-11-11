@@ -75,15 +75,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getErrorMessage(input) {
         if (input.validity.valueMissing) {
-            return 'This field is required';
+            return 'Это поле обязательно';
         }
         if (input.validity.typeMismatch) {
-            return 'Invalid format';
+            return 'Неверный формат';
         }
         if (input.validity.tooShort) {
-            return 'Too short value';
+            return 'Слишком короткое значение';
         }
-        return 'Invalid value';
+        return 'Неверное значение';
     }
 
     // 4. Button press animation
@@ -195,6 +195,134 @@ document.addEventListener('DOMContentLoaded', function() {
             isSubmitting = true;
         });
     });
+
+    // ========== WORKOUT PAGE FUNCTIONALITY ==========
+    
+    // Initialize workout timer if on workout page
+    const workoutTimer = document.getElementById('workout-timer');
+    if (workoutTimer) {
+        const startTime = new Date(workoutTimer.getAttribute('data-start-time'));
+        
+        function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            const minutes = Math.floor(diff / 60);
+            const seconds = diff % 60;
+            workoutTimer.textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    }
+
+    // Auto-save workout sets
+    let saveTimeout;
+    const SAVE_DELAY = 1000; // 1 second delay after input
+    
+    function saveSet(setId) {
+        const row = document.querySelector(`tr[data-set-id="${setId}"]`);
+        if (!row) return;
+        
+        const weight = row.querySelector('.weight-input').value;
+        const reps = row.querySelector('.reps-input').value;
+        const isCompleted = row.querySelector('.completed-checkbox').checked;
+
+        fetch(`/workouts/set/${setId}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                weight: weight ? parseFloat(weight) : null,
+                reps: reps ? parseInt(reps) : null,
+                is_completed: isCompleted
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Visual feedback
+            row.style.backgroundColor = '#f0fdf4';
+            setTimeout(() => {
+                row.style.backgroundColor = '';
+            }, 300);
+        })
+        .catch(error => console.error('Error saving set:', error));
+    }
+
+    // Event listeners for workout inputs
+    document.querySelectorAll('.weight-input, .reps-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const setId = this.getAttribute('data-set-id');
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveSet(setId), SAVE_DELAY);
+        });
+        
+        input.addEventListener('blur', function() {
+            const setId = this.getAttribute('data-set-id');
+            clearTimeout(saveTimeout);
+            saveSet(setId);
+        });
+    });
+
+    // Completed checkbox handlers
+    document.querySelectorAll('.completed-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const setId = this.getAttribute('data-set-id');
+            saveSet(setId);
+            
+            const row = this.closest('tr');
+            if (this.checked) {
+                row.classList.add('opacity-60');
+            } else {
+                row.classList.remove('opacity-60');
+            }
+        });
+    });
+
+    // Toggle exercise notes
+    window.toggleNotes = function(exerciseId) {
+        const textarea = document.getElementById(`notes-${exerciseId}`);
+        if (textarea) {
+            textarea.classList.toggle('hidden');
+            if (!textarea.classList.contains('hidden')) {
+                textarea.focus();
+            }
+        }
+    };
+
+    // Confirm before leaving unfinished workout
+    const workoutPage = document.querySelector('[data-workout-completed]');
+    if (workoutPage) {
+        const isFinished = workoutPage.getAttribute('data-workout-completed') === 'true';
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (!isFinished) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    }
+
+    // Confirm workout finish if not all sets completed
+    const finishForm = document.getElementById('finish-form');
+    if (finishForm) {
+        finishForm.addEventListener('submit', function(e) {
+            const allSetsCompleted = Array.from(document.querySelectorAll('.completed-checkbox'))
+                .filter(cb => {
+                    const setLabel = cb.closest('tr').querySelector('.inline-flex');
+                    return setLabel && !setLabel.textContent.includes('W'); // Exclude warmup
+                })
+                .every(cb => cb.checked);
+            
+            if (!allSetsCompleted) {
+                const confirmed = confirm('Not all working sets are marked as completed. Finish workout anyway?');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            }
+        });
+    }
 });
 
 // Add CSS animations dynamically

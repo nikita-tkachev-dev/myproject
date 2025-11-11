@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Create Workout Plan - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="/users/dashboard" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+        <h1 class="text-3xl font-bold mb-2">Create Your Plan</h1>
+        <p class="text-slate-600">Choose exercises for your training days</p>
+        <div class="mt-3 inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Level: <span class="font-semibold ml-1">{{ user.level|upper }}</span>
+        </div>
+    </div>
+
+    <!-- Training Info Card -->
+    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-6 text-white mb-6 shadow-lg">
+        <h2 class="text-xl font-bold mb-3">Your Training Program</h2>
+        {% if user.level == 'beginner' %}
+        <div class="space-y-2 text-sm opacity-90">
+            <p>✓ 2 training days per week (Monday, Wednesday)</p>
+            <p>✓ 2 working sets per exercise</p>
+            <p>✓ 12-15 reps, 1-2 warmup sets</p>
+            <p>✓ Focus on compound movements</p>
+        </div>
+        {% else %}
+        <div class="space-y-2 text-sm opacity-90">
+            <p>✓ 3 training days per week</p>
+            <p>✓ 4 working sets per exercise</p>
+            <p>✓ 8-12 reps, 1-2 warmup sets</p>
+            <p>✓ Friday is buffer day (optional)</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-6">
+        <!-- Plan Name -->
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Plan Name</label>
+            <input 
+                type="text" 
+                name="plan_name" 
+                value="{{ user.username }}'s Plan"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+            >
+        </div>
+
+        <!-- Training Day #1 (Monday) -->
+        <div class="bg-white rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold">Training #1</h3>
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">MONDAY</span>
+            </div>
+            <input 
+                type="text" 
+                name="day_1_name" 
+                value="Training #1"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition mb-4"
+                placeholder="Day name"
+            >
+
+            <!-- Legs -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                        Legs #1
+                    </span>
+                </label>
+                <select name="day_1_exercise_legs" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('legs') %}
+                        {% for ex in exercises_by_group['legs'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Back -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                        Back #1
+                    </span>
+                </label>
+                <select name="day_1_exercise_back" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('back') %}
+                        {% for ex in exercises_by_group['back'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Chest -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                        Chest #1
+                    </span>
+                </label>
+                <select name="day_1_exercise_chest" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('chest') %}
+                        {% for ex in exercises_by_group['chest'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Core -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                        Core #1
+                    </span>
+                </label>
+                <select name="day_1_exercise_core" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('core') %}
+                        {% for ex in exercises_by_group['core'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Calves -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-pink-500 rounded-full mr-2"></span>
+                        Calves #1
+                    </span>
+                </label>
+                <select name="day_1_exercise_calves" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                    <option value="">Choose exercise (optional)...</option>
+                    {% if exercises_by_group.get('calves') %}
+                        {% for ex in exercises_by_group['calves'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Training Day #2 (Wednesday) -->
+        <div class="bg-white rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold">Training #2</h3>
+                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">WEDNESDAY</span>
+            </div>
+            <input 
+                type="text" 
+                name="day_2_name" 
+                value="Training #2"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition mb-4"
+                placeholder="Day name"
+            >
+
+            <!-- Legs -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                        Legs #2
+                    </span>
+                </label>
+                <select name="day_2_exercise_legs" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('legs') %}
+                        {% for ex in exercises_by_group['legs'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Back -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                        Back #2
+                    </span>
+                </label>
+                <select name="day_2_exercise_back" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('back') %}
+                        {% for ex in exercises_by_group['back'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Chest -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                        Chest #2
+                    </span>
+                </label>
+                <select name="day_2_exercise_chest" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('chest') %}
+                        {% for ex in exercises_by_group['chest'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Core -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                        Core #2
+                    </span>
+                </label>
+                <select name="day_2_exercise_core" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" required>
+                    <option value="">Choose exercise...</option>
+                    {% if exercises_by_group.get('core') %}
+                        {% for ex in exercises_by_group['core'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Calves -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="w-3 h-3 bg-pink-500 rounded-full mr-2"></span>
+                        Calves #2
+                    </span>
+                </label>
+                <select name="day_2_exercise_calves" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                    <option value="">Choose exercise (optional)...</option>
+                    {% if exercises_by_group.get('calves') %}
+                        {% for ex in exercises_by_group['calves'] %}
+                        <option value="{{ ex.id }}">{{ ex.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Training Day #3 (Friday - Buffer) - Only for Intermediate -->
+        {% if user.level == 'intermediate' %}
+        <div class="bg-white rounded-3xl p-6 shadow-lg border-2 border-purple-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold">Training #3 (Buffer)</h3>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">FRIDAY - OPTIONAL</span>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">Buffer day for lagging muscle groups or your favorite exercises</p>
+            <input 
+                type="text" 
+                name="day_3_name" 
+                value="Buffer Day"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition mb-4"
+                placeholder="Day name"
+            >
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Exercise #1</label>
+                    <select name="day_3_exercise_1" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                        <option value="">Choose exercise (optional)...</option>
+                        {% for group_name, exercises in exercises_by_group.items() %}
+                            <optgroup label="{{ group_name|upper }}">
+                                {% for ex in exercises %}
+                                <option value="{{ ex.id }}">{{ ex.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Exercise #2</label>
+                    <select name="day_3_exercise_2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                        <option value="">Choose exercise (optional)...</option>
+                        {% for group_name, exercises in exercises_by_group.items() %}
+                            <optgroup label="{{ group_name|upper }}">
+                                {% for ex in exercises %}
+                                <option value="{{ ex.id }}">{{ ex.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Exercise #3</label>
+                    <select name="day_3_exercise_3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                        <option value="">Choose exercise (optional)...</option>
+                        {% for group_name, exercises in exercises_by_group.items() %}
+                            <optgroup label="{{ group_name|upper }}">
+                                {% for ex in exercises %}
+                                <option value="{{ ex.id }}">{{ ex.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Submit Button -->
+        <button 
+            type="submit"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all"
+        >
+            Create Plan
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -29,6 +29,12 @@ class User(db.Model):
     workout_sessions = db.relationship(
         "WorkoutSession", back_populates="user", cascade="all, delete-orphan"
     )
+    workout_plans = db.relationship(
+        "WorkoutPlan", back_populates="user", cascade="all, delete-orphan"
+    )
+    exercise_logs = db.relationship(
+        "ExerciseLog", back_populates="user", cascade="all, delete-orphan"
+    )
     goals = db.relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     nutrition_logs = db.relationship(
         "NutritionLog", back_populates="user", cascade="all, delete-orphan"

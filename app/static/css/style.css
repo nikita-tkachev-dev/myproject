@@ -36,19 +36,7 @@ input[type="number"] {
 }
 
 /* Radio button custom styling with animations */
-input[type="radio"] + div {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-input[type="radio"]:checked + div {
-    transform: scale(1.02);
-}
-
-
-
-/* Per-level icon fallbacks (icon gradient + shadow) */
+/* Level color highlighting */
 input[type="radio"][value="beginner"]:checked + div .level-icon {
     background-image: linear-gradient(135deg, #16a34a 0%, #059669 100%) !important;
     box-shadow: 0 6px 18px rgba(16, 185, 129, 0.12) !important;
@@ -62,30 +50,46 @@ input[type="radio"][value="advanced"]:checked + div .level-icon {
     box-shadow: 0 6px 18px rgba(124, 58, 237, 0.12) !important;
 }
 
-/* (removed .level-marker related rules — markers were removed from templates) */
-
-/* Make the whole card look selected (tint background + ring/shadow) — mirror gender radio animations */
+/* Selected card tint */
 input[type="radio"][value="beginner"]:checked + div {
-    background-color: #ecfdf5 !important; /* green-50 */
+    background-color: #ecfdf5 !important;
     border-color: #16a34a !important;
     box-shadow: 0 12px 40px rgba(16,185,129,0.08) !important;
 }
 input[type="radio"][value="intermediate"]:checked + div {
-    background-color: #fff7ed !important; /* orange-50 */
+    background-color: #fff7ed !important;
     border-color: #f97316 !important;
     box-shadow: 0 12px 40px rgba(249,115,22,0.08) !important;
 }
 input[type="radio"][value="advanced"]:checked + div {
-    background-color: #f5f3ff !important; /* purple-50 */
+    background-color: #f5f3ff !important;
     border-color: #7c3aed !important;
     box-shadow: 0 12px 40px rgba(124,58,237,0.08) !important;
 }
 
-/* (removed .level-marker related color rules — markers were removed from templates) */
+
+input[type="radio"] + div {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+input[type="radio"]:checked + div {
+    transform: scale(1.02);
+}
+
+input[type="radio"]:checked + div .w-5.h-5 svg {
+    opacity: 1 !important;
+}
 
 /* Hover effects for interactive elements */
 label:has(input[type="radio"]) {
     cursor: pointer;
+}
+
+label:has(input[type="radio"]):hover div {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Smooth scrolling */
@@ -182,4 +186,39 @@ input:focus-visible,
 select:focus-visible {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
+}
+
+/* ========== WORKOUT PAGE SPECIFIC STYLES ========== */
+
+/* Completed set row opacity */
+.set-row.opacity-60 {
+    transition: opacity 0.3s ease;
+}
+
+/* Completed checkbox styling */
+.completed-checkbox:checked {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+/* Number input spinners for workout inputs */
+.weight-input::-webkit-inner-spin-button,
+.weight-input::-webkit-outer-spin-button,
+.reps-input::-webkit-inner-spin-button,
+.reps-input::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 30px;
+}
+
+/* Highlight active workout input */
+.weight-input:focus,
+.reps-input:focus {
+    transform: scale(1.05);
+    transition: transform 0.2s ease-out;
+}
+
+.no-shadow,
+.no-shadow:hover {
+    box-shadow: none !important;
+    transform: none !important;
 }

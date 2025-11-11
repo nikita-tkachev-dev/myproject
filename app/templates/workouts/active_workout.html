@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ workout.name }} - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8 pb-24" data-workout-completed="{{ 'true' if workout.is_completed else 'false' }}">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-bold">{{ workout.name }}</h1>
+            <div class="flex items-center gap-2 text-sm text-slate-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span id="workout-timer" data-start-time="{{ workout.start_time }}">00:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+            <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                {{ workout.date.strftime('%d.%m.%Y') if workout.date else 'Today' }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercises List -->
+    <div class="space-y-4">
+        {% for workout_ex in workout.exercises %}
+        <div class="bg-white rounded-3xl p-5 shadow-lg" data-exercise-id="{{ workout_ex.id }}">
+            <!-- Exercise Header -->
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-slate-800">{{ workout_ex.exercise.name }}</h3>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">
+                        {{ workout_ex.exercise.muscle_group|upper }}
+                    </span>
+                    <span class="text-xs text-slate-500">
+                        {{ workout_ex.target_sets }} sets
+                    </span>
+                </div>
+            </div>
+
+            <!-- Sets Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200">
+                            <th class="text-left py-2 px-2 text-slate-600 font-semibold">Set</th>
+                            <th class="text-center py-2 px-2 text-slate-600 font-semibold">kg</th>
+                            <th class="text-center py-2 px-2 text-slate-600 font-semibold">Reps</th>
+                            <th class="text-center py-2 px-2 text-slate-600 font-semibold">✓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for set in workout_ex.sets %}
+                        <tr class="border-b border-slate-100 set-row" data-set-id="{{ set.id }}">
+                            <!-- Set Number -->
+                            <td class="py-3 px-2">
+                                {% if set.is_warmup %}
+                                <span class="inline-flex items-center justify-center w-8 h-8 bg-orange-100 text-orange-600 rounded-lg text-xs font-bold">
+                                    W{{ set.set_number }}
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg text-xs font-bold">
+                                    {{ set.set_number }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Weight Input -->
+                            <td class="py-3 px-2">
+                                <input 
+                                    type="number" 
+                                    step="0.5"
+                                    value="{{ set.weight if set.weight else '' }}"
+                                    placeholder="0"
+                                    class="weight-input w-full max-w-[70px] mx-auto px-2 py-2 text-center rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                                    data-set-id="{{ set.id }}"
+                                >
+                            </td>
+                            
+                            <!-- Reps Input -->
+                            <td class="py-3 px-2">
+                                <input 
+                                    type="number" 
+                                    value="{{ set.reps if set.reps else '' }}"
+                                    placeholder="0"
+                                    class="reps-input w-full max-w-[70px] mx-auto px-2 py-2 text-center rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                                    data-set-id="{{ set.id }}"
+                                >
+                            </td>
+                            
+                            <!-- Completed Checkbox -->
+                            <td class="py-3 px-2 text-center">
+                                <input 
+                                    type="checkbox" 
+                                    {% if set.is_completed %}checked{% endif %}
+                                    class="completed-checkbox w-5 h-5 rounded border-2 border-slate-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
+                                    data-set-id="{{ set.id }}"
+                                >
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <button 
+                    onclick="toggleNotes({{ workout_ex.id }})"
+                    class="text-sm text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Add notes
+                </button>
+                <textarea 
+                    id="notes-{{ workout_ex.id }}"
+                    class="notes-textarea hidden mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm"
+                    rows="2"
+                    placeholder="Exercise notes..."
+                    data-exercise-id="{{ workout_ex.id }}"
+                ></textarea>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Bottom Fixed Buttons -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-4 shadow-lg">
+    <div class="mx-auto max-w-md space-y-3">
+        <form method="post" action="/workouts/{{ workout.id }}/finish" id="finish-form">
+            <button 
+                type="submit"
+                class="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all"
+            >
+                Finish Workout
+            </button>
+        </form>
+        <a 
+            href="/workouts/plan/{{ workout.workout_plan_id }}/edit"
+            class="block w-full py-4 bg-white text-slate-700 text-center font-semibold rounded-2xl border-2 border-slate-200 hover:bg-slate-50 transition-all"
+        >
+            Edit Plan
+        </a>
+    </div>
+</div>
+{% endblock %}
