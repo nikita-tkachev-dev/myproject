@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Select Goal - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="/users/dashboard" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+        <h1 class="text-3xl font-bold mb-2">Your Goal</h1>
+        <p class="text-slate-600">Choose what you want to achieve</p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-4">
+        <!-- Weight Loss -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="goal_type" 
+                value="weight_loss" 
+                class="peer hidden"
+                required
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                <div class="flex items-start justify-between mb-3 no-shadow">
+                    <div class="w-12 h-12 level-icon bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Weight Loss</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Lose weight and get lean
+                </p>
+                <div class="flex flex-wrap gap-2 no-shadow">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Calorie deficit</span>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Cardio focus</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Muscle Gain -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="goal_type" 
+                value="muscle_gain" 
+                class="peer hidden"
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-orange-500 peer-checked:border-orange-600 peer-checked:bg-orange-50 transition-all">
+                <div class="flex items-start justify-between mb-3 no-shadow">
+                    <div class="w-12 h-12 level-icon bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Muscle Gain</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Build muscle mass
+                </p>
+                <div class="flex flex-wrap gap-2 no-shadow">
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">Calorie surplus</span>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">Heavy weights</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Strength -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="goal_type" 
+                value="strength" 
+                class="peer hidden"
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-purple-500 peer-checked:border-purple-600 peer-checked:bg-purple-50 transition-all">
+                <div class="flex items-start justify-between mb-3 no-shadow">
+                    <div class="w-12 h-12 level-icon bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Strength</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Get stronger and lift more
+                </p>
+                <div class="flex flex-wrap gap-2 no-shadow">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Low reps</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Progressive overload</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Endurance -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="goal_type" 
+                value="endurance" 
+                class="peer hidden"
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-green-500 peer-checked:border-green-600 peer-checked:bg-green-50 transition-all">
+                <div class="flex items-start justify-between mb-3 no-shadow">
+                    <div class="w-12 h-12 level-icon bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Endurance</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Improve stamina and cardio
+                </p>
+                <div class="flex flex-wrap gap-2 no-shadow">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">High volume</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Cardio training</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Flexibility -->
+        <label class="block cursor-pointer">
+            <input 
+                type="radio" 
+                name="goal_type" 
+                value="flexibility" 
+                class="peer hidden"
+            >
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 peer-checked:shadow-xl peer-checked:ring-4 peer-checked:ring-pink-500 peer-checked:border-pink-600 peer-checked:bg-pink-50 transition-all">
+                <div class="flex items-start justify-between mb-3 no-shadow">
+                    <div class="w-12 h-12 level-icon bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Flexibility</h3>
+                <p class="text-slate-600 text-sm mb-3">
+                    Improve mobility and range of motion
+                </p>
+                <div class="flex flex-wrap gap-2 no-shadow">
+                    <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">Stretching</span>
+                    <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">Yoga focus</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Optional Details -->
+        <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-200 space-y-4 mt-6">
+            <h3 class="text-lg font-bold mb-4">Goal Details (Optional)</h3>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Target Value</label>
+                <input 
+                    type="number" 
+                    name="target_value" 
+                    step="0.1"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    placeholder="e.g., 75 (kg for weight goals)"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Unit</label>
+                <input 
+                    type="text" 
+                    name="unit" 
+                    maxlength="20"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    placeholder="e.g., kg, km, minutes"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Target Date</label>
+                <input 
+                    type="date" 
+                    name="target_date"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                >
+            </div>
+        </div>
+
+        <button 
+            type="submit"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all mt-6"
+        >
+            Save Goal
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}My Workout Plan - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8 pb-24">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="/users/dashboard" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Dashboard
+        </a>
+        <div class="flex items-center justify-between mb-2">
+            <h1 class="text-3xl font-bold">{{ plan.name }}</h1>
+            <span class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-semibold">
+                {{ plan.level|upper }}
+            </span>
+        </div>
+        <p class="text-slate-600">Your personalized training plan</p>
+    </div>
+
+    <!-- Edit Plan Button -->
+    <div class="mb-6">
+        <a href="/workouts/plan/{{ plan.id }}/edit" class="inline-flex items-center px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-2xl shadow-md hover:shadow-lg transition-all">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Edit Plan
+        </a>
+    </div>
+
+    <!-- Training Days -->
+    <div class="space-y-6">
+        {% for day in plan.plan_days %}
+        <div class="bg-white rounded-3xl p-6 shadow-lg {% if day.is_optional %}border-2 border-purple-200{% endif %}">
+            <!-- Day Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold mb-1">{{ day.name }}</h2>
+                    <div class="flex items-center gap-2">
+                        {% if day.day_number == 1 %}
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">MONDAY</span>
+                        {% elif day.day_number == 2 %}
+                        <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">WEDNESDAY</span>
+                        {% elif day.day_number == 3 %}
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">FRIDAY</span>
+                        {% endif %}
+                        {% if day.is_optional %}
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold">OPTIONAL</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <form method="post" action="/workouts/start/{{ day.id }}" style="display: inline;">
+                    <button type="submit" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all">
+                        Start
+                    </button>
+                </form>
+            </div>
+
+            <!-- Exercises List -->
+            <div class="space-y-3">
+                {% for plan_ex in day.exercises %}
+                <div class="bg-slate-50 rounded-2xl p-4">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-slate-800 mb-1">{{ plan_ex.exercise.name }}</h3>
+                            <div class="flex items-center gap-2 text-sm text-slate-600">
+                                <span class="inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                                    </svg>
+                                    {{ plan_ex.target_sets }} sets
+                                </span>
+                                <span>•</span>
+                                <span>{{ plan_ex.target_reps_min }}-{{ plan_ex.target_reps_max }} reps</span>
+                                {% if plan_ex.warmup_sets > 0 %}
+                                <span>•</span>
+                                <span class="text-orange-600">{{ plan_ex.warmup_sets }} warmup</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                            {{ plan_ex.exercise.muscle_group|upper }}
+                        </span>
+                    </div>
+                    {% if plan_ex.exercise.description %}
+                    <p class="text-sm text-slate-500 mt-2">{{ plan_ex.exercise.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Day Summary -->
+            <div class="mt-4 pt-4 border-t border-slate-200">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-600">Total exercises:</span>
+                    <span class="font-semibold text-slate-800">{{ day.exercises|length }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Info Card -->
+    <div class="mt-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-6 border border-blue-100">
+        <div class="flex items-start">
+            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-semibold text-slate-800 mb-1">Training Tips</h3>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    {% if plan.level == 'beginner' %}
+                    <li>• Focus on proper form before adding weight</li>
+                    <li>• Rest 90-120 seconds between sets</li>
+                    <li>• Complete all warmup sets before working sets</li>
+                    {% else %}
+                    <li>• Progressive overload: increase weight gradually</li>
+                    <li>• Rest 2-3 minutes between heavy sets</li>
+                    <li>• Track your progress consistently</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

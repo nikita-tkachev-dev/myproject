@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Workout History - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <a href="/users/dashboard" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-4">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+        <h1 class="text-3xl font-bold mb-2">Workout History</h1>
+        <p class="text-slate-600">Track your progress over time</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-white rounded-2xl p-4 shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-slate-800">{{ stats.total_volume|round|int }}<span class="text-sm font-normal">kg</span></p>
+                    <p class="text-xs text-slate-500">Total Volume</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-slate-800">{{ stats.avg_duration }}<span class="text-sm font-normal">min</span></p>
+                    <p class="text-xs text-slate-500">Avg Duration</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="bg-white rounded-3xl p-5 shadow-md mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-800">Volume Progress</h2>
+            <select id="chart-period" class="text-sm px-3 py-1 rounded-lg border border-slate-200 focus:border-blue-500 outline-none">
+                <option value="week">Last 7 days</option>
+                <option value="month" selected>Last 30 days</option>
+                <option value="all">All time</option>
+            </select>
+        </div>
+        <div class="relative h-48">
+            <canvas id="volumeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Personal Records -->
+    {% if personal_records %}
+    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 shadow-md mb-6 border border-amber-200">
+        <div class="flex items-center gap-2 mb-4">
+            <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <h2 class="text-lg font-bold text-slate-800">Personal Records</h2>
+        </div>
+        <div class="space-y-3">
+            {% for pr in personal_records[:5] %}
+            <div class="flex items-center justify-between bg-white/60 rounded-xl px-4 py-3">
+                <div>
+                    <p class="font-semibold text-slate-800">{{ pr.exercise_name }}</p>
+                    <p class="text-xs text-slate-500">{{ pr.date.strftime('%d.%m.%Y') if pr.date else '' }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-bold text-amber-600">{{ pr.weight }}kg</p>
+                    <p class="text-xs text-slate-500">× {{ pr.reps }} reps</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Workout List -->
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4">Recent Workouts</h2>
+        
+        {% if workouts %}
+        <div class="space-y-3">
+            {% for workout in workouts %}
+            <a href="/workouts/{{ workout.id }}/summary" class="block bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800">{{ workout.name }}</h3>
+                            <p class="text-sm text-slate-500">{{ workout.date.strftime('%d.%m.%Y') if workout.date else 'N/A' }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-slate-700">{{ workout.duration }} min</p>
+                        <p class="text-xs text-slate-500">{{ workout.total_volume|round|int }} kg</p>
+                    </div>
+                </div>
+                
+                <!-- Exercise summary -->
+                <div class="mt-3 pt-3 border-t border-slate-100">
+                    <div class="flex flex-wrap gap-2">
+                        {% for muscle in workout.muscle_groups[:4] %}
+                        <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">
+                            {{ muscle|upper }}
+                        </span>
+                        {% endfor %}
+                        {% if workout.muscle_groups|length > 4 %}
+                        <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">
+                            +{{ workout.muscle_groups|length - 4 }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        {% if has_more %}
+        <button 
+            onclick="loadMoreWorkouts()"
+            class="w-full mt-4 py-3 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-all"
+        >
+            Load More
+        </button>
+        {% endif %}
+        
+        {% else %}
+        <div class="bg-white rounded-2xl p-8 shadow-md text-center">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">No workouts yet</h3>
+            <p class="text-slate-500 mb-4">Complete your first workout to see your progress here</p>
+            <a 
+                href="active_workout"
+                class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
+            >
+                Start Workout
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+// Chart data from backend
+const chartData = {{ chart_data|tojson|safe if chart_data else '{"labels":[],"values":[]}' }};
+
+let volumeChart = null;
+
+function initChart() {
+    const ctx = document.getElementById('volumeChart');
+    if (!ctx) return;
+    
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+    
+    volumeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels || [],
+            datasets: [{
+                label: 'Volume (kg)',
+                data: chartData.values || [],
+                borderColor: '#3b82f6',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    cornerRadius: 8,
+                    padding: 12
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { 
+                        color: '#94a3b8',
+                        font: { size: 11 }
+                    }
+                },
+                y: {
+                    grid: { 
+                        color: '#f1f5f9',
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        color: '#94a3b8',
+                        font: { size: 11 }
+                    },
+                    beginAtZero: true
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+// Period change handler
+document.getElementById('chart-period')?.addEventListener('change', function() {
+    // In real app, fetch new data based on period
+    // For now, just re-render with existing data
+    console.log('Period changed to:', this.value);
+});
+
+// Load more workouts
+let currentPage = 1;
+function loadMoreWorkouts() {
+    currentPage++;
+    fetch(`/workouts/history?page=${currentPage}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Append new workouts to list
+        console.log('Loaded more workouts:', data);
+    })
+    .catch(err => console.error('Error loading workouts:', err));
+}
+
+// Initialize chart on load
+document.addEventListener('DOMContentLoaded', initChart);
+</script>
+{% endblock %}

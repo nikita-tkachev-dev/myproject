@@ -12,6 +12,7 @@ from app.extensions import db
 from .models import User, Goal
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from app.workouts.routers import get_user_stats
 
 user_routes = Blueprint("users", __name__, url_prefix="/users")
 
@@ -152,7 +153,7 @@ def login():
 
         session["user_id"] = user.id
         flash("Logged in", "success")
-        return redirect(url_for("users.select_level"))
+        return redirect(url_for("users.dashboard"))
 
     return render_template("users/login.html")
 
@@ -173,18 +174,24 @@ def select_level():
     user = User.query.get(session["user_id"])
     if request.method == "POST":
         level = request.form.get("level")
+
         if level not in ("beginner", "intermediate", "advanced"):
             flash("Invalid level", "error")
             return render_template("users/select_level.html", user=user)
+
         # guard: ensure user exists
         if user:
             user.level = level
+            # Deactivate existing plans when changing level
+            for plan in user.workout_plans:
+                plan.is_active = False
             db.session.commit()
+            flash("Level saved. Please create a new workout plan.", "success")
+
         else:
             flash("User not found", "error")
             return redirect(url_for("users.login"))
-        flash("Level saved", "success")
-        return redirect(url_for("users.dashboard"))
+        return redirect(url_for("workouts.create_plan"))
 
     return render_template("users/select_level.html", user=user)
 
@@ -210,12 +217,10 @@ def select_goal():
             flash("Please select a goal", "error")
             return render_template("users/select_goal.html", user=user)
 
-        existing_goal = Goal.query.filter_by(
-            user_id=user.id, goal_type=goal_type
-        ).first()
+        # Проверка: уже есть цель → не создаём новую
+        existing_goal = Goal.query.filter_by(user_id=user.id, is_active=True).first()
         if existing_goal:
-            flash("You already have this goal", "error")
-            return redirect(url_for("users.dashboard"))
+            existing_goal.is_active = False
 
         current_value = None
         if goal_type in ["weight_loss", "muscle_gain"]:
@@ -233,10 +238,17 @@ def select_goal():
                 else None
             ),
         )
+
         db.session.add(goal)
         db.session.commit()
 
         flash("Goal saved successfully", "success")
+
+        # Новый юзер: создаём план
+        if not user.workout_plans:
+            return redirect(url_for("workouts.create_plan"))
+
+        # Старый: сразу на дэшборд
         return redirect(url_for("users.dashboard"))
 
     return render_template("users/select_goal.html", user=user)
@@ -247,4 +259,5 @@ def dashboard():
     if "user_id" not in session:
         return redirect(url_for("users.login"))
     user = User.query.get(session["user_id"])
-    return render_template("users/dashboard.html", user=user)
+    stats = get_user_stats(user.id) if user else {}
+    return render_template("users/dashboard.html", user=user, stats=stats)

@@ -20,7 +20,8 @@ from .models import (
     TemplateExercise,
 )
 from app.exercises.models import Exercise
-from datetime import datetime, date
+from app.users.models import User
+from datetime import datetime, date, timedelta
 
 workout_routes = Blueprint("workouts", __name__, url_prefix="/workouts")
 
@@ -114,20 +115,15 @@ def create_plan():
                 if not exercise_id:
                     continue
 
-                # Get target sets and reps based on level
-                if user.level == "beginner":
-                    target_sets = 2
-                    reps_min, reps_max = 12, 15
-                    warmup_sets = 1
-                else:  # intermediate
-                    target_sets = 4
-                    reps_min, reps_max = 8, 12
-                    warmup_sets = 2
-
-                # Special case for core and calves - always 3 sets
+                # Determine plan parameters
                 exercise = Exercise.query.get(exercise_id)
-                if exercise and exercise.muscle_group in ["core"]:
-                    target_sets = 3
+                active_goal = next((g for g in user.goals if g.is_active), None)
+                goal_type = active_goal.goal_type if active_goal else None
+                target_sets, reps_min, reps_max, warmup_sets = get_plan_params(
+                    user_level=user.level,
+                    goal_type=goal_type,
+                    muscle_group=exercise.muscle_group if exercise else None,
+                )
 
                 plan_exercise = WorkoutPlanExercise(
                     plan_day_id=plan_day.id,
@@ -173,8 +169,16 @@ def edit_plan(plan_id):
     if "user_id" not in session:
         return redirect(url_for("users.login"))
 
+    from app.users.models import User
+
+    user = User.query.get(session["user_id"])
     plan = WorkoutPlan.query.get_or_404(plan_id)
 
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("users.login"))
+
+    # Check access (только одна проверка)
     if plan.user_id != session["user_id"]:
         flash("Access denied", "error")
         return redirect(url_for("users.dashboard"))
@@ -193,19 +197,49 @@ def edit_plan(plan_id):
             exercises_by_group[group].append(ex)
 
         return render_template(
-            "workouts/edit_plan.html", plan=plan, exercises_by_group=exercises_by_group
+            "workouts/edit_plan.html",
+            plan=plan,
+            exercises_by_group=exercises_by_group,
+            user=user,
         )
 
     # POST: Update plan
     try:
         plan.name = request.form.get("plan_name", plan.name)
 
-        # Update each day's exercises (simplified - full implementation would handle additions/deletions)
+        # Get user's active goal
+        active_goal = (
+            next((g for g in user.goals if g.is_active), None) if user.goals else None
+        )
+        goal_type = active_goal.goal_type if active_goal else None
+
+        # Update each day's exercises
         for day in plan.plan_days:
-            for ex in day.exercises:
-                new_exercise_id = request.form.get(f"exercise_{ex.id}")
-                if new_exercise_id:
-                    ex.exercise_id = new_exercise_id
+            for plan_ex in day.exercises:
+                # Get new exercise ID from form
+                new_exercise_id = request.form.get(f"exercise_{plan_ex.id}")
+                if not new_exercise_id:
+                    continue
+
+                # Update exercise
+                plan_ex.exercise_id = int(new_exercise_id)
+
+                # Get exercise object to check muscle group
+                exercise = Exercise.query.get(int(new_exercise_id))
+                if not exercise:
+                    continue
+
+                # Recalculate parameters based on new exercise
+                target_sets, reps_min, reps_max, warmup_sets = get_plan_params(
+                    user_level=user.level,
+                    goal_type=goal_type,
+                    muscle_group=exercise.muscle_group,
+                )
+
+                plan_ex.target_sets = target_sets
+                plan_ex.target_reps_min = reps_min
+                plan_ex.target_reps_max = reps_max
+                plan_ex.warmup_sets = warmup_sets
 
         db.session.commit()
         flash("Plan updated successfully", "success")
@@ -320,6 +354,27 @@ def update_set(set_id):
     return jsonify({"message": "Set updated", "set_id": set_id})
 
 
+# ------------------- DELETE SET ------------------
+@workout_routes.route("/set/<int:set_id>/delete", methods=["POST"])
+def delete_set(set_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    exercise_set = ExerciseSet.query.get_or_404(set_id)
+
+    # Проверка владельца
+    if exercise_set.workout_exercise.workout_session.user_id != session["user_id"]:
+        return jsonify({"error": "Access denied"}), 403
+
+    try:
+        db.session.delete(exercise_set)
+        db.session.commit()
+        return jsonify({"message": "Set deleted", "set_id": set_id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 # ------------------ FINISH WORKOUT ------------------
 @workout_routes.route("/<int:workout_id>/finish", methods=["POST"])
 def finish_workout(workout_id):
@@ -355,7 +410,29 @@ def history():
         .all()
     )
 
-    return render_template("workouts/history.html", workouts=workouts)
+    # Статистика
+    stats = get_user_stats(session["user_id"])
+
+    # Chart data
+    chart_data = {
+        "labels": [w.date.strftime("%d.%m") for w in workouts],
+        "values": [w.total_volume for w in workouts],
+    }
+
+    # Личные рекорды (пока пустой список)
+    personal_records = []
+
+    # Для кнопки Load More
+    has_more = len(workouts) == 30
+
+    return render_template(
+        "workouts/history.html",
+        workouts=workouts,
+        stats=stats,
+        chart_data=chart_data,
+        personal_records=personal_records,
+        has_more=has_more,
+    )
 
 
 # ------------------ GET WORKOUT DETAILS (API) ------------------
@@ -399,3 +476,74 @@ def get_workout_details(workout_id):
             ],
         }
     )
+
+
+# ------------------ FUNCTIONS(extras) ------------------
+def get_plan_params(user_level, goal_type, muscle_group):
+    """Determine plan parameters based on user level, goal, and muscle group"""
+    if user_level == "beginner":
+        target_sets = 2
+        reps_min, reps_max = 12, 15
+        warmup_sets = 1
+    elif user_level == "intermediate":
+        target_sets = 4
+        reps_min, reps_max = 8, 12
+        warmup_sets = 2
+    else:  # advanced
+        target_sets = 5
+        reps_min, reps_max = 6, 10
+        warmup_sets = 2
+
+    if goal_type == "weight_loss" or goal_type == "endurance":
+        reps_min, reps_max = 12, 15
+    elif goal_type == "muscle_gain":
+        reps_min, reps_max = 8, 12
+    elif goal_type == "strength":
+        reps_min, reps_max = 6, 8
+
+    # Special case for core and calves - always 3 sets
+    if muscle_group in ["core", "calves"]:
+        target_sets = 3
+
+    return target_sets, reps_min, reps_max, warmup_sets
+
+
+def get_user_stats(user_id):
+    # 1. Completed workouts count
+    workouts = WorkoutSession.query.filter_by(user_id=user_id, is_completed=True).all()
+
+    total_workouts = len(workouts)
+
+    # 2. DAY STREAK calculation
+    dates = sorted({w.date for w in workouts})
+    today = datetime.utcnow().date()
+
+    streak = 0
+    day = today
+    while day in dates:
+        streak += 1
+        day -= timedelta(days=1)
+
+    # 3. Total volume
+    total_volume = (
+        db.session.query(db.func.sum(ExerciseSet.weight * ExerciseSet.reps))
+        .join(WorkoutExercise, ExerciseSet.workout_exercise_id == WorkoutExercise.id)
+        .join(WorkoutSession, WorkoutExercise.workout_session_id == WorkoutSession.id)
+        .filter(WorkoutSession.user_id == user_id)
+        .filter(ExerciseSet.is_warmup == False)
+        .scalar()
+        or 0
+    )
+
+    # 4. Avg duration
+    durations = [
+        (w.end_time - w.start_time).seconds / 60 for w in workouts if w.end_time
+    ]
+    avg_duration = round(sum(durations) / len(durations)) if durations else 0
+
+    return {
+        "total_workouts": total_workouts,
+        "current_streak": streak,
+        "total_volume": int(total_volume),
+        "avg_duration": avg_duration,
+    }

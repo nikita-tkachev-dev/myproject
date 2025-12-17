@@ -24,6 +24,10 @@ def create_app(config_class=Config):
     app.register_blueprint(workout_routes)
     app.register_blueprint(nutrition_routes)
 
+    from .cli import init_cli
+
+    init_cli(app)
+
     @app.route("/")
     def index():
         return render_template("index.html")
