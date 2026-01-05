@@ -28,6 +28,29 @@ class WorkoutSession(db.Model):
 
     __table_args__ = (db.Index("idx_workout_session_user_date", "user_id", "date"),)
 
+    @property
+    def total_duration(self):
+        if self.start_time and self.end_time:
+            return (self.end_time - self.start_time).total_seconds() / 60  # in minutes
+        return 0
+
+    @property
+    def total_volume(self):
+        total = 0
+        for exercise in self.exercises:  # type: ignore
+            for ex_set in exercise.sets:
+                if not ex_set.is_warmup and ex_set.weight and ex_set.reps:
+                    total += ex_set.weight * ex_set.reps
+        return total
+
+    @property
+    def muscle_groups(self):
+        groups = set()
+        for exercise in self.exercises:  # type: ignore
+            if exercise.exercise and exercise.exercise.muscle_group:
+                groups.add(exercise.exercise.muscle_group)
+        return list(groups)
+
 
 class WorkoutExercise(db.Model):
     __tablename__ = "workout_exercises"

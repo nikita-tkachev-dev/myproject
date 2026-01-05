@@ -191,7 +191,7 @@ def select_level():
         else:
             flash("User not found", "error")
             return redirect(url_for("users.login"))
-        return redirect(url_for("workouts.create_plan"))
+        return redirect(url_for("users.select_goal"))
 
     return render_template("users/select_level.html", user=user)
 

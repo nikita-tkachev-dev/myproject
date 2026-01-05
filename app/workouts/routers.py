@@ -42,6 +42,11 @@ def create_plan():
         flash("Please select your level first", "error")
         return redirect(url_for("users.select_level"))
 
+    active_goal = next((g for g in user.goals if g.is_active), None)
+    if not active_goal:
+        flash("Please select your goal first", "error")
+        return redirect(url_for("users.select_goal"))
+
     if request.method == "GET":
         # Load templates for user's level
         templates = (
@@ -72,8 +77,13 @@ def create_plan():
         )
 
     # POST: Save user's plan
+
     try:
         plan_name = request.form.get("plan_name", f"{user.username}'s Plan")
+
+        WorkoutPlan.query.filter_by(user_id=user.id, is_active=True).update(
+            {"is_active": False}
+        )
 
         # Create the main plan
         plan = WorkoutPlan(
@@ -106,25 +116,33 @@ def create_plan():
             # Get selected exercises for this day
             exercise_keys = [
                 k
-                for k in request.form.keys()
-                if k.startswith(f"day_{day_num}_exercise_")
+                for k in sorted(request.form.keys())
+                if k.startswith(f"day_{day_num}_exercise_") and request.form.get(k)
             ]
 
+            # app/workouts/routers.py
             for i, key in enumerate(sorted(exercise_keys), start=1):
                 exercise_id = request.form.get(key)
                 if not exercise_id:
                     continue
 
-                # Determine plan parameters
+                # 1️⃣ СНАЧАЛА получаем упражнение
                 exercise = Exercise.query.get(exercise_id)
+                if not exercise:
+                    continue
+
+                # 2️⃣ ПОТОМ получаем цель юзера
                 active_goal = next((g for g in user.goals if g.is_active), None)
                 goal_type = active_goal.goal_type if active_goal else None
+
+                # 3️⃣ ЗАТЕМ вычисляем параметры
                 target_sets, reps_min, reps_max, warmup_sets = get_plan_params(
                     user_level=user.level,
                     goal_type=goal_type,
-                    muscle_group=exercise.muscle_group if exercise else None,
+                    muscle_group=exercise.muscle_group,
                 )
 
+                # 4️⃣ И ТОЛЬКО ПОТОМ создаём plan_exercise
                 plan_exercise = WorkoutPlanExercise(
                     plan_day_id=plan_day.id,
                     exercise_id=exercise_id,
@@ -135,7 +153,6 @@ def create_plan():
                     warmup_sets=warmup_sets,
                 )
                 db.session.add(plan_exercise)
-
         db.session.commit()
         flash("Your workout plan has been created!", "success")
         return redirect(url_for("users.dashboard"))
@@ -257,6 +274,16 @@ def start_workout(plan_day_id):
     """Start a new workout session from a plan day"""
     if "user_id" not in session:
         return redirect(url_for("users.login"))
+
+    active_workout = WorkoutSession.query.filter_by(
+        user_id=session["user_id"], is_completed=False
+    ).first()
+
+    if active_workout:
+        flash("You already have an active workout!", "warning")
+        return redirect(
+            url_for("workouts.active_workout", workout_id=active_workout.id)
+        )
 
     plan_day = WorkoutPlanDay.query.get_or_404(plan_day_id)
 
@@ -403,8 +430,17 @@ def history():
     if "user_id" not in session:
         return redirect(url_for("users.login"))
 
+    from sqlalchemy.orm import joinedload
+    from typing import cast
+    from sqlalchemy.orm.attributes import InstrumentedAttribute
+
     workouts = (
-        WorkoutSession.query.filter_by(user_id=session["user_id"], is_completed=True)
+        WorkoutSession.query.options(
+            joinedload(
+                cast(InstrumentedAttribute, WorkoutSession.exercises)
+            ).joinedload(cast(InstrumentedAttribute, WorkoutExercise.exercise))
+        )
+        .filter_by(user_id=session["user_id"], is_completed=True)
         .order_by(WorkoutSession.date.desc())
         .limit(30)
         .all()
@@ -502,8 +538,14 @@ def get_plan_params(user_level, goal_type, muscle_group):
         reps_min, reps_max = 6, 8
 
     # Special case for core and calves - always 3 sets
-    if muscle_group in ["core", "calves"]:
+    if muscle_group == "core":
         target_sets = 3
+        reps_min, reps_max = 15, 20
+        warmup_sets = 0
+    elif muscle_group == "calves":
+        target_sets = 3
+        reps_min, reps_max = 12, 15
+        warmup_sets = 1
 
     return target_sets, reps_min, reps_max, warmup_sets
 
@@ -515,14 +557,18 @@ def get_user_stats(user_id):
     total_workouts = len(workouts)
 
     # 2. DAY STREAK calculation
-    dates = sorted({w.date for w in workouts})
+    dates = sorted({w.date for w in workouts}, reverse=True)
     today = datetime.utcnow().date()
 
     streak = 0
-    day = today
-    while day in dates:
-        streak += 1
-        day -= timedelta(days=1)
+    expected_date = today
+
+    for workout_date in dates:
+        if workout_date == expected_date:
+            streak += 1
+            expected_date -= timedelta(days=1)
+        elif workout_date < expected_date:
+            break
 
     # 3. Total volume
     total_volume = (
