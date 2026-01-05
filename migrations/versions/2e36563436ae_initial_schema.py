@@ -1,8 +1,8 @@
-"""initial migration
+"""initial schema
 
-Revision ID: 923574fece9b
+Revision ID: 2e36563436ae
 Revises: 
-Create Date: 2025-09-17 18:09:25.344567
+Create Date: 2026-01-05 18:36:36.719181
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '923574fece9b'
+revision = '2e36563436ae'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,6 +39,10 @@ def upgrade():
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password_hash', sa.String(length=200), nullable=False),
     sa.Column('level', sa.Enum('beginner', 'intermediate', 'advanced', name='user_levels'), nullable=True),
+    sa.Column('birth_date', sa.Date(), nullable=True),
+    sa.Column('height', sa.Integer(), nullable=True),
+    sa.Column('weight', sa.Float(), nullable=True),
+    sa.Column('gender', sa.Enum('male', 'female', 'other', name='genders'), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -47,6 +51,38 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_users_email'), ['email'], unique=True)
         batch_op.create_index(batch_op.f('ix_users_username'), ['username'], unique=True)
 
+    op.create_table('workout_templates',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('level', sa.Enum('beginner', 'intermediate', 'advanced', name='template_levels'), nullable=False),
+    sa.Column('day_number', sa.Integer(), nullable=False),
+    sa.Column('is_optional', sa.Boolean(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('exercise_logs',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('exercise_id', sa.Integer(), nullable=False),
+    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('sets', sa.Integer(), nullable=False),
+    sa.Column('is_warmup', sa.Boolean(), nullable=True),
+    sa.Column('reps', sa.Integer(), nullable=False),
+    sa.Column('weight', sa.Float(), nullable=True),
+    sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('exercise_statistics',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('exercise_id', sa.Integer(), nullable=False),
+    sa.Column('total_performed', sa.Integer(), nullable=False),
+    sa.Column('total_weight_lifted', sa.Float(), nullable=False),
+    sa.Column('last_performed', sa.Date(), nullable=True),
+    sa.Column('is_warmup', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('goals',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -70,9 +106,47 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('template_exercises',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('template_id', sa.Integer(), nullable=False),
+    sa.Column('exercise_id', sa.Integer(), nullable=False),
+    sa.Column('muscle_group', sa.Enum('legs', 'back', 'chest', 'core', 'calves', 'arms', 'shoulders', name='template_muscle_groups'), nullable=False),
+    sa.Column('exercise_number', sa.Integer(), nullable=False),
+    sa.Column('order_in_workout', sa.Integer(), nullable=False),
+    sa.Column('target_sets', sa.Integer(), nullable=False),
+    sa.Column('target_reps_min', sa.Integer(), nullable=False),
+    sa.Column('target_reps_max', sa.Integer(), nullable=False),
+    sa.Column('warmup_sets', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
+    sa.ForeignKeyConstraint(['template_id'], ['workout_templates.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('workout_plans',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('level', sa.Enum('beginner', 'intermediate', 'advanced', name='plan_levels'), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('workout_plans', schema=None) as batch_op:
+        batch_op.create_index('idx_workout_plan_user', ['user_id'], unique=False)
+
+    op.create_table('workout_plan_days',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('workout_plan_id', sa.Integer(), nullable=False),
+    sa.Column('day_number', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('is_optional', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['workout_plan_id'], ['workout_plans.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('workout_sessions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workout_plan_id', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=True),
@@ -80,6 +154,7 @@ def upgrade():
     sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('is_completed', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['workout_plan_id'], ['workout_plans.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('workout_sessions', schema=None) as batch_op:
@@ -99,6 +174,19 @@ def upgrade():
     with op.batch_alter_table('workout_exercises', schema=None) as batch_op:
         batch_op.create_index('idx_workout_exercise_session', ['workout_session_id'], unique=False)
 
+    op.create_table('workout_plan_exercises',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('plan_day_id', sa.Integer(), nullable=False),
+    sa.Column('exercise_id', sa.Integer(), nullable=False),
+    sa.Column('order_in_workout', sa.Integer(), nullable=False),
+    sa.Column('target_sets', sa.Integer(), nullable=False),
+    sa.Column('target_reps_min', sa.Integer(), nullable=False),
+    sa.Column('target_reps_max', sa.Integer(), nullable=False),
+    sa.Column('warmup_sets', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
+    sa.ForeignKeyConstraint(['plan_day_id'], ['workout_plan_days.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('exercise_sets',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('workout_exercise_id', sa.Integer(), nullable=False),
@@ -111,6 +199,7 @@ def upgrade():
     sa.Column('is_completed', sa.Boolean(), nullable=False),
     sa.Column('rpe', sa.Integer(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('is_warmup', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['workout_exercise_id'], ['workout_exercises.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -126,6 +215,7 @@ def downgrade():
         batch_op.drop_index('idx_exercise_set_workout_exercise')
 
     op.drop_table('exercise_sets')
+    op.drop_table('workout_plan_exercises')
     with op.batch_alter_table('workout_exercises', schema=None) as batch_op:
         batch_op.drop_index('idx_workout_exercise_session')
 
@@ -134,8 +224,17 @@ def downgrade():
         batch_op.drop_index('idx_workout_session_user_date')
 
     op.drop_table('workout_sessions')
+    op.drop_table('workout_plan_days')
+    with op.batch_alter_table('workout_plans', schema=None) as batch_op:
+        batch_op.drop_index('idx_workout_plan_user')
+
+    op.drop_table('workout_plans')
+    op.drop_table('template_exercises')
     op.drop_table('nutritionlogs')
     op.drop_table('goals')
+    op.drop_table('exercise_statistics')
+    op.drop_table('exercise_logs')
+    op.drop_table('workout_templates')
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_users_username'))
         batch_op.drop_index(batch_op.f('ix_users_email'))
