@@ -94,7 +94,7 @@
         {% if workouts %}
         <div class="space-y-3">
             {% for workout in workouts %}
-            <a href="/workouts/{{ workout.id }}/summary" class="block bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all">
+            <a href="{{ url_for('workouts.workout_summary', workout_id=workout.id) }}" class="block bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -151,10 +151,10 @@
             <h3 class="text-lg font-semibold text-slate-800 mb-2">No workouts yet</h3>
             <p class="text-slate-500 mb-4">Complete your first workout to see your progress here</p>
             <a 
-                href="active_workout"
+                href="{{ url_for('users.dashboard') }}"
                 class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
             >
-                Start Workout
+                Go to Dashboard
             </a>
         </div>
         {% endif %}

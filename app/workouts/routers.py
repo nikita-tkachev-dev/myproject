@@ -201,6 +201,16 @@ def edit_plan(plan_id):
         return redirect(url_for("users.dashboard"))
 
     if request.method == "GET":
+        active_workout = WorkoutSession.query.filter_by(
+            user_id=session["user_id"], is_completed=False
+        ).first()
+
+        if active_workout:
+            db.session.delete(active_workout)
+            db.session.commit()
+            flash("Active workout session was removed to allow plan editing.", "info")
+
+    if request.method == "GET":
         exercises = (
             Exercise.query.filter_by(is_active=True)
             .order_by(Exercise.muscle_group, Exercise.name)
@@ -423,6 +433,27 @@ def finish_workout(workout_id):
     return redirect(url_for("users.dashboard"))
 
 
+# ------------------ CANCEL WORKOUT ------------------
+@workout_routes.route("/<int:workout_id>/cancel", methods=["POST"])
+def cancel_workout(workout_id):
+    """Cancel/delete an active workout without saving it"""
+    if "user_id" not in session:
+        return redirect(url_for("users.login"))
+
+    workout = WorkoutSession.query.get_or_404(workout_id)
+
+    if workout.user_id != session["user_id"]:
+        flash("Access denied", "error")
+        return redirect(url_for("users.dashboard"))
+
+    # Delete the workout session (cascade will delete all exercises and sets)
+    db.session.delete(workout)
+    db.session.commit()
+
+    flash("Workout cancelled", "info")
+    return redirect(url_for("users.dashboard"))
+
+
 # ------------------ DASHBOARD (workout history) ------------------
 @workout_routes.route("/history")
 def history():
@@ -469,6 +500,28 @@ def history():
         personal_records=personal_records,
         has_more=has_more,
     )
+
+
+# ------------------ WORKOUT SUMMARY ------------------
+@workout_routes.route("/<int:workout_id>/summary")
+def workout_summary(workout_id):
+    """Страница сводки завершенной тренировки"""
+    if "user_id" not in session:
+        return redirect(url_for("users.login"))
+
+    # Загружаем тренировку
+    workout = WorkoutSession.query.get_or_404(workout_id)
+
+    # Проверка: может ли пользователь смотреть эту тренировку
+    if workout.user_id != session["user_id"]:
+        flash("У вас нет доступа к этой записи", "error")
+        return redirect(url_for("workouts.history"))
+
+    # Если тренировка вдруг еще не закончена, отправим её доделывать
+    if not workout.is_completed:
+        return redirect(url_for("workouts.active_workout", workout_id=workout.id))
+
+    return render_template("workouts/summary.html", workout=workout)
 
 
 # ------------------ GET WORKOUT DETAILS (API) ------------------

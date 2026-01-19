@@ -75,15 +75,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getErrorMessage(input) {
         if (input.validity.valueMissing) {
-            return 'Это поле обязательно';
+            return 'This field is required';
         }
         if (input.validity.typeMismatch) {
-            return 'Неверный формат';
+            return 'Invalid format';
         }
         if (input.validity.tooShort) {
-            return 'Слишком короткое значение';
+            return 'Too short value';
         }
-        return 'Неверное значение';
+        return 'Invalid value';
     }
 
     // 4. Button press animation
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 5. Auto-hide flash messages
-    const flashMessages = document.querySelectorAll('.fixed.top-4 > div');
+    const flashMessages = document.querySelectorAll('.flash-container > div');
     flashMessages.forEach(msg => {
         setTimeout(() => {
             msg.style.animation = 'slideUp 0.3s ease-out';

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+.venv/
+env/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Git
+.github
+.gitignore
+
+# Tests & cache
+.pytest_cache/
+.mypy_cache/
+
+# Local backups
+app/static_backup/
+app/templates_backup/
+
+# OS
+.DS_Store
+Thumbs.db
+

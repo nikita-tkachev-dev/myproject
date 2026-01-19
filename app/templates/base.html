@@ -2,11 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    
+    <!-- iOS PWA optimizations -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- PWA meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Training">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- iOS icons -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Prevent text selection on iOS -->
+    <meta name="format-detection" content="telephone=no">
+    
     <title>{% block title %}Training Manager{% endblock %}</title>
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,14 +45,23 @@
             }
         }
     </script>
+    
+    <!-- iOS splash screens (optional but nice) -->
+    <style>
+        /* Prevent overscroll/bounce on iOS */
+        html, body {
+            overscroll-behavior: none;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-b from-slate-50 to-slate-100 fixed inset-0 overflow-auto">
-    <!-- iPhone Safe Area -->
-    <div class="mx-auto max-w-md min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 antialiased">
+    <!-- Safe area container for iPhone notch/home indicator -->
+    <div class="ios-safe-area mx-auto max-w-md min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
         
+        <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+                <div class="fixed left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 flash-container">
                     {% for category, msg in messages %}
                         <div class="mb-2 p-4 rounded-2xl shadow-lg backdrop-blur-sm
                                     {% if category == 'success' %}bg-green-500 text-white{% endif %}
@@ -41,10 +74,13 @@
             {% endif %}
         {% endwith %}
 
-        <main>
+        <main class="main-content">
             {% block content %}{% endblock %}
         </main>
     </div>
+    
+    <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+    

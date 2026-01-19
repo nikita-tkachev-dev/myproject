@@ -207,6 +207,8 @@ def select_goal():
         flash("User not found", "error")
         return redirect(url_for("users.login"))
 
+    existing_goal = Goal.query.filter_by(user_id=user.id, is_active=True).first()
+
     if request.method == "POST":
         goal_type = request.form.get("goal_type")
         target_value = request.form.get("target_value")
@@ -215,10 +217,11 @@ def select_goal():
 
         if not goal_type:
             flash("Please select a goal", "error")
-            return render_template("users/select_goal.html", user=user)
+            return render_template(
+                "users/select_goal.html", user=user, existing_goal=existing_goal
+            )
 
         # Проверка: уже есть цель → не создаём новую
-        existing_goal = Goal.query.filter_by(user_id=user.id, is_active=True).first()
         if existing_goal:
             existing_goal.is_active = False
 
@@ -251,7 +254,9 @@ def select_goal():
         # Старый: сразу на дэшборд
         return redirect(url_for("users.dashboard"))
 
-    return render_template("users/select_goal.html", user=user)
+    return render_template(
+        "users/select_goal.html", user=user, existing_goal=existing_goal
+    )
 
 
 @user_routes.route("/dashboard")

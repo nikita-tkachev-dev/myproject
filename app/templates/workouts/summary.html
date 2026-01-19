@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Workout Summary - Training Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen px-6 py-8 ios-safe-area">
+    <!-- Header -->
+    <div class="mb-6">
+        <!-- Исправлено на url_for -->
+        <a href="{{ url_for('workouts.history') }}" class="inline-flex items-center text-slate-600 hover:text-slate-900 mb-4">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to History
+        </a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-1">{{ workout.name }}</h1>
+                <p class="text-slate-500">{{ workout.date.strftime('%A, %d %B %Y') if workout.date else 'N/A' }}</p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="bg-white rounded-2xl p-4 shadow-sm text-center">
+            <p class="text-xl font-bold text-slate-800">{{ workout.duration or 0 }}</p>
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Mins</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm text-center">
+            <p class="text-xl font-bold text-slate-800">{{ workout.total_volume|round|int }}</p>
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">KG Vol</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm text-center">
+            <p class="text-xl font-bold text-slate-800">{{ workout.total_sets }}</p>
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Sets</p>
+        </div>
+    </div>
+
+    <!-- Exercises List -->
+    <div class="space-y-4 mb-8">
+        {% for exercise in workout.exercises %}
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-4 bg-slate-50/50 flex justify-between items-center">
+                <h4 class="font-bold text-slate-800">{{ exercise.name }}</h4>
+                {% if exercise.is_pr %}
+                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black uppercase">PR</span>
+                {% endif %}
+            </div>
+            
+            <div class="p-4">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
+                            <th class="pb-2">Set</th>
+                            <th class="pb-2 text-center">Weight</th>
+                            <th class="pb-2 text-center">Reps</th>
+                            <th class="pb-2 text-right">Vol</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-600">
+                        {% for set in exercise.sets %}
+                        <tr class="border-t border-slate-50 {% if set.is_warmup %}opacity-40{% endif %}">
+                            <td class="py-2 text-sm font-bold">{{ "W" if set.is_warmup else loop.index }}</td>
+                            <td class="py-2 text-sm text-center">{{ set.weight or 0 }}<span class="text-[10px] ml-0.5">kg</span></td>
+                            <td class="py-2 text-sm text-center">{{ set.reps or 0 }}</td>
+                            <!-- Безопасный расчет объема -->
+                            <td class="py-2 text-sm text-right font-medium text-slate-400">
+                                {{ ((set.weight or 0) * (set.reps or 0))|round|int }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-3">
+        <!-- Ссылка повтора через url_for (если роут поддерживает аргументы) -->
+        <a href="{{ url_for('workouts.history') }}" 
+           class="block w-full py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-lg text-center active:scale-95 transition-transform">
+            Done
+        </a>
+    </div>
+</div>
+{% endblock %}

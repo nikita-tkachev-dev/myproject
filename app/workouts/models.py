@@ -51,6 +51,27 @@ class WorkoutSession(db.Model):
                 groups.add(exercise.exercise.muscle_group)
         return list(groups)
 
+    @property
+    def duration(self):
+        """Duration in minutes"""
+        if self.start_time and self.end_time:
+            return round((self.end_time - self.start_time).total_seconds() / 60)
+        return 0
+
+    @property
+    def total_sets(self):
+        """Count total working sets (excluding warmup)"""
+        total = 0
+        for exercise in self.exercises:  # type: ignore
+            total += len([s for s in exercise.sets if not s.is_warmup])
+        return total
+
+    @property
+    def new_records(self):
+        """Get personal records set in this workout - placeholder for now"""
+        # TODO: Implement PR tracking logic
+        return []
+
 
 class WorkoutExercise(db.Model):
     __tablename__ = "workout_exercises"
@@ -72,6 +93,33 @@ class WorkoutExercise(db.Model):
     )
 
     __table_args__ = (db.Index("idx_workout_exercise_session", "workout_session_id"),)
+
+    @property
+    def name(self):
+        """Exercise name"""
+        return self.exercise.name if self.exercise else "Unknown"
+
+    @property
+    def muscle_group(self):
+        """Exercise muscle group"""
+        return self.exercise.muscle_group if self.exercise else "unknown"
+
+    @property
+    def total_volume(self):
+        """Calculate total volume for this exercise"""
+        total = 0
+        for ex_set in self.sets:  # type: ignore
+            weight = ex_set.weight or 0
+            reps = ex_set.reps or 0
+            if not ex_set.is_warmup:
+                total += weight * reps
+        return total
+
+    @property
+    def is_pr(self):
+        """Check if this exercise contains a PR - placeholder for now"""
+        # TODO: Implement PR detection logic
+        return False
 
 
 class ExerciseSet(db.Model):
